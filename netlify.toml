@@ -2,6 +2,10 @@
   command = ""
   publish = "."
 
+[[edge_functions]]
+  path = "/"
+  function = "geo-lang"
+
 [[redirects]]
   from = "/api/sonar"
   to = "https://zonotv1.netlify.app/api/sonar"
