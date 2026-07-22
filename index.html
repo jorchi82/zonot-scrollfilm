@@ -508,16 +508,19 @@ select.sonar__field option{color:var(--ink); background:var(--marfil)}
 .final{
   background:var(--navy-deep); color:var(--marfil);
   text-align:center; padding:clamp(110px,16vh,200px) var(--margin);
+  position:relative; overflow:hidden; isolation:isolate;
 }
-.video-divider{max-width:760px; margin:0 auto clamp(160px,22vh,240px)}
+/* el cenote a sangre completa, fondo real de la sección (no un clip insertado):
+   mismo mundo del film, se funde en los cuatro bordes con fade lineal en vez
+   de la máscara elíptica anterior que lo hacía verse "una cajita de video" */
+.video-divider{position:absolute; inset:0; z-index:0}
 .video-divider video{
-  width:100%; display:block;
-  /* máscara elíptica estrecha: el haz central queda nítido y los cuatro bordes del
-     rectángulo se disuelven en el navy antes de tocar el borde real del video */
-  -webkit-mask:radial-gradient(62% 88% at 50% 44%, #000 22%, rgba(0,0,0,0) 74%);
-          mask:radial-gradient(62% 88% at 50% 44%, #000 22%, rgba(0,0,0,0) 74%);
+  width:100%; height:100%; object-fit:cover; display:block; opacity:.5;
+  -webkit-mask:linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+          mask:linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
 }
 .video-divider[hidden]{display:none}
+.final > *:not(.video-divider){position:relative; z-index:1}
 .final h2{margin:0 auto; max-width:18ch}
 .final h2 em{color:var(--turq)}
 .final__sub{margin:26px auto 0; max-width:44ch; opacity:.7; font-size:16px}
@@ -944,10 +947,10 @@ select.sonar__field option{color:var(--ink); background:var(--marfil)}
 
 <!-- CTA final -->
 <section class="final" id="contacto">
-  <!-- Video divider: clip con fondo #081320 puro — flota sin caja sobre esta sección.
-       Activar quitando [hidden] y poniendo el src cuando llegue el clip. -->
-  <div class="video-divider" id="videoDivider">
-    <video muted autoplay loop playsinline preload="metadata" poster="assets/cenote/divider-poster.webp" aria-hidden="true" src="assets/cenote/divider.mp4"></video>
+  <!-- El cenote sigue presente como fondo de toda la sección (a sangre completa,
+       no un recuadro insertado) — es el mismo mundo del film, no un clip aparte. -->
+  <div class="video-divider" id="videoDivider" aria-hidden="true">
+    <video muted autoplay loop playsinline preload="metadata" poster="assets/cenote/divider-poster.webp" src="assets/cenote/divider.mp4"></video>
   </div>
   <h2 data-reveal>El descenso termina aquí.<br>Tu <em>claridad</em> empieza.</h2>
   <p class="final__sub" data-reveal>Cuéntanos de tu negocio por formulario — o escríbenos directo. Respondemos en menos de 24 horas.</p>
