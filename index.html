@@ -504,9 +504,10 @@ select.sonar__field option{color:var(--ink); background:var(--marfil)}
 .video-divider{max-width:760px; margin:0 auto clamp(160px,22vh,240px)}
 .video-divider video{
   width:100%; display:block;
-  /* la máscara difumina los bordes del rectángulo hacia el fondo navy: el clip flota sin caja */
-  -webkit-mask:radial-gradient(120% 100% at 50% 45%, #000 42%, transparent 82%);
-          mask:radial-gradient(120% 100% at 50% 45%, #000 42%, transparent 82%);
+  /* máscara elíptica estrecha: el haz central queda nítido y los cuatro bordes del
+     rectángulo se disuelven en el navy antes de tocar el borde real del video */
+  -webkit-mask:radial-gradient(62% 88% at 50% 44%, #000 22%, rgba(0,0,0,0) 74%);
+          mask:radial-gradient(62% 88% at 50% 44%, #000 22%, rgba(0,0,0,0) 74%);
 }
 .video-divider[hidden]{display:none}
 .final h2{margin:0 auto; max-width:18ch}
