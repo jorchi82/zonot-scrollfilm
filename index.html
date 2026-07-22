@@ -501,8 +501,13 @@ select.sonar__field option{color:var(--ink); background:var(--marfil)}
   background:var(--navy-deep); color:var(--marfil);
   text-align:center; padding:clamp(110px,16vh,200px) var(--margin);
 }
-.video-divider{max-width:820px; margin:0 auto clamp(140px,20vh,220px)}
-.video-divider video{width:100%; display:block}
+.video-divider{max-width:760px; margin:0 auto clamp(160px,22vh,240px)}
+.video-divider video{
+  width:100%; display:block;
+  /* la máscara difumina los bordes del rectángulo hacia el fondo navy: el clip flota sin caja */
+  -webkit-mask:radial-gradient(120% 100% at 50% 45%, #000 42%, transparent 82%);
+          mask:radial-gradient(120% 100% at 50% 45%, #000 42%, transparent 82%);
+}
 .video-divider[hidden]{display:none}
 .final h2{margin:0 auto; max-width:18ch}
 .final h2 em{color:var(--turq)}
@@ -924,8 +929,8 @@ select.sonar__field option{color:var(--ink); background:var(--marfil)}
 <section class="final" id="contacto">
   <!-- Video divider: clip con fondo #081320 puro — flota sin caja sobre esta sección.
        Activar quitando [hidden] y poniendo el src cuando llegue el clip. -->
-  <div class="video-divider" id="videoDivider" hidden>
-    <video muted autoplay loop playsinline preload="metadata" aria-hidden="true"></video>
+  <div class="video-divider" id="videoDivider">
+    <video muted autoplay loop playsinline preload="metadata" poster="assets/cenote/divider-poster.webp" aria-hidden="true" src="assets/cenote/divider.mp4"></video>
   </div>
   <h2 data-reveal>El descenso termina aquí.<br>Tu <em>claridad</em> empieza.</h2>
   <p class="final__sub" data-reveal>Cuéntanos de tu negocio por formulario — o escríbenos directo. Respondemos en menos de 24 horas.</p>
