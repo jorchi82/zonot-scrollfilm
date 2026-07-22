@@ -116,17 +116,21 @@ body{
 .mark h1{
   font-family:var(--font-display); font-weight:700;
   font-size:clamp(88px,17vw,300px); letter-spacing:.01em;
-  color:var(--marfil); line-height:1;
+  color:var(--marfil); line-height:1.1;
 }
-.mark .ch{display:inline-block; transform:translateY(118%); opacity:0}
-.mark .ch.in{transform:none; opacity:1; transition:transform 1.05s var(--ease), opacity .6s linear}
-.mark__clip{overflow:hidden; display:inline-block; padding-bottom:.06em}
+.mark .ch{display:inline-block; transform:translateY(112%); opacity:0}
+/* opacity y transform terminan juntos (antes .6s vs 1.05s hacía que la letra
+   se viera "sólida" a medio deslizar, como si se cortara) */
+.mark .ch.in{transform:none; opacity:1; transition:transform 1s var(--ease), opacity .85s var(--ease)}
+/* padding en ambos lados: el box de recorte antes solo tenía aire abajo (.06em)
+   y cortaba el remate superior de Safiro (ascendentes más altos que 1em) al asentarse */
+.mark__clip{overflow:hidden; display:inline-block; padding:.14em 0 .08em}
 .mark__tag{
   position:absolute; left:50%; transform:translateX(-50%);
   top:calc(50% + clamp(64px,10vw,170px));
   font-family:var(--font-mono); font-size:clamp(10px,1.1vw,13px);
   letter-spacing:.32em; text-transform:uppercase; color:var(--marfil); opacity:0;
-  white-space:nowrap;
+  white-space:nowrap; text-align:center;
 }
 .mark__tag.in{opacity:.72; transition:opacity 1.2s .9s linear}
 
@@ -614,6 +618,14 @@ select.sonar__field option{color:var(--ink); background:var(--marfil)}
   .depth{display:none}
   .hd__lang{display:none}
   .beam{width:74vw}
+}
+@media (max-width:520px){
+  /* el tagline del hero desbordaba a ambos lados en pantallas angostas:
+     nowrap + tracking amplio sobre un string largo no cabe en 375px */
+  .mark__tag{
+    white-space:normal; max-width:78vw;
+    letter-spacing:.18em; line-height:1.7;
+  }
 }
 @media (prefers-reduced-motion:reduce){
   .cue i{animation:none}
@@ -1194,7 +1206,12 @@ const CENOTE_READY = new Promise(res => {
 const CENOTE_PATH = i => CENOTE_DIR + "f_" + String(i + 1).padStart(3, "0") + ".jpg";
 const cenoteImages = new Array(CENOTE_COUNT);
 const cenoteBitmaps = new Map(), cenoteDecoding = new Set();
-const CB_AHEAD = 18, CB_KEEP = 28;
+/* Ventana de caché más angosta que antes (18/28 → 12/18): cada bitmap decodificado
+   pesa varios MB sin comprimir: el máximo anterior (57 frames cacheados) rondaba los
+   200-450MB en RAM. Los WebViews in-app (Instagram, TikTok) tienen presupuestos de
+   memoria mucho más bajos que un navegador normal y descartan ese contenido bajo
+   presión — eso es lo que se veía como cuadro negro. Ahora caben 25 como máximo. */
+const CB_AHEAD = 12, CB_KEEP = 18;
 let cenoteBmpCenter = -999, cenoteW = 0, cenoteH = 0, cenoteDpr = 1;
 
 function sizeCenote(){
@@ -1228,15 +1245,36 @@ function nearestCenoteBitmap(idx){
   }
   return null;
 }
+/* Los <img> de loadCenoteFrames() se cargan una vez y nunca se liberan (a diferencia
+   de los ImageBitmap cacheados, que sí se descartan). Sirven de respaldo garantizado
+   cuando la caché de bitmaps queda vacía cerca del índice pedido — evita el cuadro
+   negro que aparece en scroll rápido hacia atrás o bajo presión de memoria (WebViews
+   como el navegador in-app de Instagram descartan bitmaps con más agresividad). */
+function nearestCenoteImage(idx){
+  const img = cenoteImages[idx];
+  if (img && img.complete && img.naturalWidth) return img;
+  for (let d = 1; d < CENOTE_COUNT; d++){
+    const lo = cenoteImages[idx - d], hi = cenoteImages[idx + d];
+    if (lo && lo.complete && lo.naturalWidth) return lo;
+    if (hi && hi.complete && hi.naturalWidth) return hi;
+  }
+  return null;
+}
+let cenoteLastDrawn = -1; // último índice pintado con éxito: si todo lo demás falla, no borramos el canvas
 function drawCenote(idx){
-  const bmp = nearestCenoteBitmap(Math.round(idx));
-  if (!bmp) return;
+  const i = Math.round(idx);
+  const bmp = nearestCenoteBitmap(i) || nearestCenoteImage(i);
+  if (!bmp){
+    if (cenoteLastDrawn === -1) return; // aún nada que mostrar (arranque en frío)
+    return; // se conserva el frame previamente pintado en vez de dejar el canvas vacío
+  }
   const ir = bmp.width / bmp.height, cr = cenoteW / cenoteH;
   let dw, dh, dx, dy;
   if (cr > ir){ dw = cenoteW; dh = cenoteW / ir; dx = 0; dy = (cenoteH - dh) / 2; }
   else { dh = cenoteH; dw = cenoteH * ir; dy = 0; dx = (cenoteW - dw) / 2; }
   cctx.clearRect(0, 0, cenoteW, cenoteH);
   cctx.drawImage(bmp, dx, dy, dw, dh);
+  cenoteLastDrawn = i;
 }
 function loadCenoteFrames(){
   const CONC = 10; let next = 0;
