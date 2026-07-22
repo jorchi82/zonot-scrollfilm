@@ -1006,6 +1006,8 @@ const CFG = {
   }
   function goTo(i){
     idx = Math.max(0, Math.min(N - 1, i));
+    // recalcular ancho por si measure() se saltó en modo grid y slideW quedó viejo/0
+    if (!gridMQ.matches){ slideW = slideEls[0].getBoundingClientRect().width + 20; }
     targetX = -idx * slideW;
     sync();
   }
