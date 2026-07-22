@@ -1227,12 +1227,14 @@ const CENOTE_READY = new Promise(res => {
 const CENOTE_PATH = i => CENOTE_DIR + "f_" + String(i + 1).padStart(3, "0") + ".jpg";
 const cenoteImages = new Array(CENOTE_COUNT);
 const cenoteBitmaps = new Map(), cenoteDecoding = new Set();
-/* Ventana de caché más angosta que antes (18/28 → 12/18): cada bitmap decodificado
-   pesa varios MB sin comprimir: el máximo anterior (57 frames cacheados) rondaba los
-   200-450MB en RAM. Los WebViews in-app (Instagram, TikTok) tienen presupuestos de
-   memoria mucho más bajos que un navegador normal y descartan ese contenido bajo
-   presión — eso es lo que se veía como cuadro negro. Ahora caben 25 como máximo. */
-const CB_AHEAD = 12, CB_KEEP = 18;
+/* Ojo con este número: se probó reducirlo agresivamente (12/18) pensando que
+   liberaría memoria en WebViews con presupuesto ajustado, pero medido con el
+   mismo scroll sintético subió el jank de ~94ms a >200ms — el fallback a <img>
+   (abajo) es mucho más caro por frame que un ImageBitmap precacheado, así que
+   una ventana angosta fuerza ese fallback demasiado seguido. La corrección real
+   del cuadro negro es el fallback en sí (nunca deja el canvas vacío/perdido),
+   no el tamaño de esta ventana — así que se deja casi como el original. */
+const CB_AHEAD = 18, CB_KEEP = 26;
 let cenoteBmpCenter = -999, cenoteW = 0, cenoteH = 0, cenoteDpr = 1;
 
 function sizeCenote(){
