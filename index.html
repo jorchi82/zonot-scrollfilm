@@ -80,10 +80,12 @@ body{
 }
 .layer{position:absolute; inset:0; will-change:transform,opacity}
 
-/* — Capa del cenote real, al fondo de todo, apenas insinuada — */
+/* — Capa del cenote real: fondo protagonista del film (antes "apenas insinuada").
+   Menos blur = se lee como metraje real, no como una mancha; sigue en screen para
+   sumar la luz real (god-rays, cáusticas) sobre el degradado de superficie. — */
 .cenote-canvas{
   position:absolute; inset:0; width:100%; height:100%; display:block;
-  filter:blur(3.5px);
+  filter:blur(2px) saturate(1.05);
   opacity:0; will-change:opacity; mix-blend-mode:screen;
 }
 
@@ -1407,8 +1409,11 @@ function computeP(){
   pRaw = clamp(-r.top/(r.height-innerHeight),0,1);
 }
 function render(p,t){
-  /* cenote real: insinuado detrás de todo, entra pronto y con presencia real */
-  const cenoteAlpha = reduceMotion ? 0 : seg(p,0.12,0.27) * (1 - seg(p,0.87,0.97)) * 0.6;
+  /* cenote real: presente desde el hero (antes empezaba en p=0.12 → arriba solo
+     se veía el degradado CSS). Base 0.5 en superficie subiendo a ~0.62 en la
+     inmersión (≈ el máximo anterior, así el tramo profundo que ya se veía bien no
+     cambia), y se disuelve igual al final para dejar entrar la poza marfil. */
+  const cenoteAlpha = reduceMotion ? 0 : (0.5 + 0.12*seg(p,0.05,0.30)) * (1 - seg(p,0.87,0.97));
   cenoteCanvas.style.opacity = cenoteAlpha.toFixed(3);
   if (cenoteAlpha > 0.004){
     const cenoteTarget = seg(p,0.11,0.94) * (CENOTE_COUNT - 1);
