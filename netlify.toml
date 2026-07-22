@@ -3,6 +3,12 @@
   publish = "."
 
 [[redirects]]
+  from = "/api/sonar"
+  to = "https://zonotv1.netlify.app/api/sonar"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
